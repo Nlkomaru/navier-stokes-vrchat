@@ -1,0 +1,18 @@
+# Blender backup and recovery files
+*.blend[0-9]*
+*.blend@
+
+# Local inspection and temporary verification files
+stats.json
+*_error.txt
+_preview_vortex.py
+_inspect_vortex.py
+_finalize_vortex.py
+_publish_vortex.py
+publish_check.json
+
+# Python and OS caches
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
