@@ -1,4 +1,6 @@
 # OpenAI Navier-Stokes 3Dモデル再現 引き継ぎ資料 (Handover Guide)
+> **公開配布の入口:** 導入者向け手順・現行リポジトリ配置は [README.md](README.md) を参照してください。旧環境のパスやコマンドを含む以下の開発記録は履歴資料であり、公開版の手順ではありません。現行の公開構成は `Deliverables/`（unitypackage）、`Unity/Assets/Nikomaru/NavierStokes/`（編集用Unityアセット）、`Tools/UnityEditor/`（開発専用ツール）、`Source/`（Blenderソース）です。
+
 
 ## 1. プロジェクトの目的・要件
 OpenAIの流体方程式（Navier-Stokes blowup）解説ページの3D流線イラストをBlenderのPythonスクリプトでプロシージャルに再現するプロジェクトです。
@@ -59,6 +61,61 @@ Get-Content $stats
 ### `.blend` ファイルへの保存方法
 調整が完了したら、`bpy.data.texts["Text"]` を最新の `generate_vortex.py` で上書きし、`bpy.ops.wm.save_as_mainfile(filepath=...)` で保存してください。注釈はBlender内蔵フォントを使います。Windows付属フォント等を埋め込む場合は別途再配布権を確認する必要があります。生成スクリプト単体ではText同期・保存を行いません。保存後は `.blend` を再読込し、Textの一致とレンダーを確認してください（※ユーザーがBlender GUIで `Untitled.blend` を開いている最中は上書き競合に注意し、必要に応じて別名保存してください）。
 
+### イヤリング用 Blender / FBX 出力（2026-11-05）
+
+- 最新ソースは `C:\Users\nikom\orca\workspaces\openai-navier-stokes\silverside`。旧Gドライブの同名プロジェクトではありません。
+- `build_earring.py` は隣の `generate_vortex.py` をそのまま実行し、元のシルエット・RGBグラデーション・白矢印・内蔵フォント注釈を保持してイヤリング化します。元の `Untitled.blend` は変更しません。
+- 基準サイズは渦本体高さ **0.10m**、交互に90度回した **4個の簡素な楕円チェーンリンクで0.05m**、白矢印の上端に最小限の接続アイレットを追加。リンク断面は4角・周方向12分割で装飾を増やしません。原点はチェーン上端、Unityではペンダントが **-Y** に下がります。サイズ違いはUnity側で全体を等倍スケールします。
+- `NavierStokesRig` の骨階層は `EarAnchor > Chain_01 > Chain_02 > Chain_03 > Pendant > PendantEnd`。PhysBoneの推奨rootは `Chain_01`、固定親は `EarAnchor`、明示的な末端は `PendantEnd`。本体と注釈は `Pendant` へ剛体ウェイト、チェーンは深さに応じてチェーン骨間を補間し、接続アイレットは `Pendant` へ固定します。
+- 実測は本体 **19,770 Tris**、チェーン＋接続部 **480 Tris**、注釈4個合計 **2,246 Tris**（全体22,496 Tris）。本体の **20,000 Tris以下** は引き続き必須。チェーンと注釈メッシュは別予算であり、イヤリング全体が20,000 Tris以下という意味ではありません。
+- `Annotations` 空オブジェクト配下に4個の名前付き注釈メッシュを保持します。本体には結合せず、外部フォントは不要です。
+- 元のグレースケール `Col` はRGBではありません。実際のマテリアルのColor Rampを `InnerGold_Gradient.png` / `MidBlueRibbon_Gradient.png` / `OuterCyan_Gradient.png` / `AxisWhite_Gradient.png` に焼き、UV0で参照します。Unityは通常の **lilToon `_MainTex` + 白い `_Color`** を使用し、カスタム頂点カラーシェーダーは不要です。PNGはsRGB・Clamp・Bilinear・MipMapなし・非圧縮。`ChainSilver` / `AnnotationTextMat` / `AnnotationLineMat` は単色です。
+- ベイクはscene-linearのColor Rampを明示的にsRGBエンコードします。元のカーブ由来UVは削除し、唯一の `UVMap`（UV0）に係数を保存して、Blenderノードも明示的に同じUVを参照します。これにより、Blenderだけが `UVMap.001` を読みUnityが旧UV0を読む不一致を防ぎます。
+- 出力先は `D:\VR\Projects\openai-navier-stokes`：
+  - `Source\NavierStokes_Earring.blend`（`generate_vortex.py` / `build_earring.py` のText同期済み）
+  - `Source\generate_vortex.py` / `Source\build_earring.py` / `Source\LICENSE`
+  - `Source\export-contract.json`（階層、単位、マテリアル、寸法、統計、実行コマンド）
+  - `Source\build-result.json`（非同期起動用の実行IDと成功／失敗）
+  - `Assets\Nikomaru\NavierStokes\Models\NavierStokes_Earring.fbx`
+  - `Assets\Nikomaru\NavierStokes\Textures\*_Gradient.png`
+- `.blend` はUnityの `Assets` 外に置き、FBXと二重インポートしません。FBXはメートル・Y-up / -Z-forward、追加leaf boneなし、アニメーションなし。Unityではファイル単位を使用、Scale Factor 1、Bake Axis Conversion ON、Generic、Optimize Game Objects OFF、Preserve Hierarchy ONとします。
+
+以下は**生成・検証・レンダリング用コマンド**です。実行済み結果は `Source\build-result.json` と `Source\smoke-result.json`、同一照明／カメラでのRGBベイク比較は `Source\gradient-diagnostic.json` に保存しています。
+
+```powershell
+$script = "C:\Users\nikom\orca\workspaces\openai-navier-stokes\silverside\build_earring.py"
+$project = "D:\VR\Projects\openai-navier-stokes"
+$run = [guid]::NewGuid().ToString()
+$result = Join-Path $project "Source\build-result.json"
+& "$env:LOCALAPPDATA\Microsoft\WindowsApps\blender-launcher.exe" -b --python $script -- --project $project --validate --render --close-up --run-id $run
+# Store launcherは非同期。古いFBX/画像の存在を完了判定に使わないこと。
+$deadline = (Get-Date).AddMinutes(10)
+do {
+    Start-Sleep -Seconds 1
+    $status = $null
+    if (Test-Path $result) {
+        try { $status = Get-Content $result -Raw | ConvertFrom-Json } catch {}
+    }
+    if ((Get-Date) -gt $deadline) { throw "Blender completion timed out: $run" }
+} until ($status.run_id -eq $run -and $status.status -in @("complete", "failed"))
+if ($status.status -eq "failed") { throw $status.traceback }
+$status
+```
+
+`--validate` は本体ポリゴン数・実寸・接続位置・骨階層・全頂点の正規化済みウェイト・注釈分離・ソースText同期を確認します。`--render` は注釈込みの全体像 `Source\earring_preview.png`、`--close-up` はチェーンと白矢印の接続部 `Source\earring_chain_closeup.png` を保存します。生成だけならこれら3オプションを省略できます。本体のポリゴン制限はオプションに関係なく適用されます。FBXのUnity実寸・スキニング・PhysBone挙動・マテリアル表示とレンダーの視覚確認は、実行後に統合担当側で行います。
+
+保存済み `.blend` の再読込と実際のスキニング変形は別プロセスで確認できます。生成コマンドの後に実行し、上記と同じ実行ID付きの待機処理を `Source\smoke-result.json` に対して使用します。
+
+```powershell
+$run = [guid]::NewGuid().ToString()
+$result = Join-Path $project "Source\smoke-result.json"
+& "$env:LOCALAPPDATA\Microsoft\WindowsApps\blender-launcher.exe" -b --python $script -- --project $project --smoke --render --run-id $run
+```
+
+再読込検証ではText同期・実寸・全ウェイト・唯一のUV0を再確認し、`Chain_02` をローカルZ軸で20度回して評価済みメッシュの移動を測定します。実測は本体最大移動0.046306m、チェーン0.011854m、全注釈も追従、`EarAnchor` 行列変化0、白矢印先端と `Pendant` の距離誤差0、復元後頂点誤差0でした。変形画像は `Source\earring_deformed.png`、テスト姿勢は `.blend` に保存しません。
+
+RGBベイク前後の同一条件レンダーは `Source\gradient_reference.png` / `Source\gradient_baked.png`。画像全チャンネル平均絶対差0.00002135、最大0.007843、0.02超のチャンネル0、UV係数の最大誤差2.97e-8でした。旧UVを誤計測した最大誤差1.00049は、UVMap/UVMap.001二重化という実際のUV0不具合を特定して修正済みです。
+
 ---
 
 ## 4. ポリゴン数（Tris）の計算式とバジェット管理
@@ -97,4 +154,4 @@ Get-Content $stats
 5. 本体・注釈の実頂点をカメラへ投影し、全てが画像の各端から3%以上内側に収まることを確認しました。
 6. 公開準備時にArialの埋め込みを除去し、注釈をBlender内蔵フォントに変更。外部アセット未同梱、注釈ON/OFFの再レンダー、保存後のText一致、画面内の余白を再確認しました。`.blend1`・一時スクリプト・検証JSONは公開対象外です。
 
-参照画像とは流線の密度・細部形状に差があり、画像の完全一致ではありません。FBX出力・Unity/VRChatでのマテリアル表示は未検証です。
+参照画像とは流線の密度・細部形状に差があり、画像の完全一致ではありません。上記1〜6は元の渦モデルのレンダー検証時点の記録です。その後、セクション3のイヤリング用FBX出力、保存済み `.blend` の再読込・ソース同期・実寸・ウェイト・評価済みスキニング変形、およびRGBベイク前後の画像比較まで実行済みです。Unity/VRChatでの最終インポート・マテリアル表示・PhysBone統合の検証結果は、別担当のUnity側証跡を参照してください。

@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "status": "exported",
+  "license": "GPL-3.0-only",
+  "source_checkout": ".",
+  "fbx": "../Unity/Assets/Nikomaru/NavierStokes/Models/NavierStokes_Earring.fbx",
+  "blend": "NavierStokes_Earring.blend",
+  "units": "meters",
+  "blender_up": "+Z",
+  "fbx_up": "+Y",
+  "fbx_forward": "-Z",
+  "unity_import": {
+    "globalScale": 1,
+    "useFileScale": true,
+    "bakeAxisConversion": true,
+    "animationType": "Generic",
+    "optimizeGameObjects": false,
+    "importAnimation": false,
+    "preserveHierarchy": true
+  },
+  "attachment_origin": [
+    0,
+    0,
+    0
+  ],
+  "pendant_direction_unity": "-Y",
+  "body_height_m": 0.1,
+  "chain_length_m": 0.05,
+  "arrow_tip_unity_m": [
+    0,
+    -0.05,
+    0
+  ],
+  "bounds_blender_m": {
+    "min": [
+      -0.04570939764380455,
+      -0.02851465716958046,
+      -0.15000000596046448
+    ],
+    "max": [
+      0.03966261446475983,
+      0.02610490284860134,
+      0.0
+    ]
+  },
+  "expected_height_m": 0.15000000000000002,
+  "armature": "NavierStokesRig",
+  "bones": [
+    {
+      "name": "EarAnchor",
+      "parent": null
+    },
+    {
+      "name": "Chain_01",
+      "parent": "EarAnchor"
+    },
+    {
+      "name": "Chain_02",
+      "parent": "Chain_01"
+    },
+    {
+      "name": "Chain_03",
+      "parent": "Chain_02"
+    },
+    {
+      "name": "Pendant",
+      "parent": "Chain_03"
+    },
+    {
+      "name": "PendantEnd",
+      "parent": "Pendant"
+    }
+  ],
+  "physbone": {
+    "stationary_root": "EarAnchor",
+    "recommended_root": "Chain_01",
+    "explicit_endpoint": "PendantEnd",
+    "endpointPosition": [
+      0,
+      0,
+      0
+    ]
+  },
+  "meshes": {
+    "NavierStokes_OpenAI_Vortex": {
+      "weight": "Pendant:1",
+      "triangle_budget": 20000
+    },
+    "Chain": {
+      "weight": "linear depth blend Chain_01/Chain_02/Chain_03/Pendant; eyelet Pendant:1",
+      "oval_links": 4,
+      "tip_eyelets": 1
+    },
+    "Annotations": {
+      "type": "EMPTY",
+      "children": [
+        "Label_InwardSpiral",
+        "Line_InwardSpiral",
+        "Label_AxialStretching",
+        "Line_AxialStretching"
+      ],
+      "weight": "each child Pendant:1",
+      "external_fonts": false
+    }
+  },
+  "color_encoding": "Actual RGB original ramps baked to sRGB PNG + UV0; no Col/vertex-color shader needed",
+  "unity_material_shader": "lilToon",
+  "main_texture_property": "_MainTex",
+  "main_color_property": "_Color",
+  "materials": [
+    {
+      "name": "InnerGold",
+      "main_texture": "Assets/Nikomaru/NavierStokes/Textures/InnerGold_Gradient.png",
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "srgb": true,
+      "wrap": "Clamp",
+      "filter": "Bilinear",
+      "mipmaps": false,
+      "compression": "None"
+    },
+    {
+      "name": "MidBlueRibbon",
+      "main_texture": "Assets/Nikomaru/NavierStokes/Textures/MidBlueRibbon_Gradient.png",
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "srgb": true,
+      "wrap": "Clamp",
+      "filter": "Bilinear",
+      "mipmaps": false,
+      "compression": "None"
+    },
+    {
+      "name": "OuterCyan",
+      "main_texture": "Assets/Nikomaru/NavierStokes/Textures/OuterCyan_Gradient.png",
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "srgb": true,
+      "wrap": "Clamp",
+      "filter": "Bilinear",
+      "mipmaps": false,
+      "compression": "None"
+    },
+    {
+      "name": "AxisWhite",
+      "main_texture": "Assets/Nikomaru/NavierStokes/Textures/AxisWhite_Gradient.png",
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "srgb": true,
+      "wrap": "Clamp",
+      "filter": "Bilinear",
+      "mipmaps": false,
+      "compression": "None"
+    },
+    {
+      "name": "ChainSilver",
+      "main_texture": null,
+      "color_linear": [
+        0.65,
+        0.7,
+        0.78,
+        1
+      ],
+      "metallic": 0.85,
+      "roughness": 0.24
+    },
+    {
+      "name": "AnnotationTextMat",
+      "main_texture": null,
+      "color_linear": [
+        0.55,
+        0.58,
+        0.6,
+        1
+      ]
+    },
+    {
+      "name": "AnnotationLineMat",
+      "main_texture": null,
+      "color_linear": [
+        0.27,
+        0.29,
+        0.31,
+        1
+      ]
+    }
+  ],
+  "triangle_budget_scope": "vortex body only; chain and four separate annotations additional",
+  "statistics": {
+    "body_triangles": 19770,
+    "chain_triangles": 480,
+    "annotations_triangles": 2246,
+    "all_vertices_fully_weighted": true,
+    "rigid_pendant_annotations": true,
+    "gradient_uv_channels": 1,
+    "gradient_uv_factor_max_error": 2.965666101584219e-08,
+    "source_text_synchronized": true
+  },
+  "optional_validation_executed": true,
+  "execution_command_powershell": "blender --background --python ../build_earring.py -- --project <Unity project root> --validate --render --close-up --run-id <run-id>",
+  "previews": [
+    "earring_preview.png",
+    "earring_chain_closeup.png"
+  ]
+}

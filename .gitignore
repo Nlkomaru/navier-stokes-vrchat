@@ -16,3 +16,20 @@ __pycache__/
 *.py[cod]
 .DS_Store
 Thumbs.db
+
+# Unity-generated caches and local editor state
+/Library/
+/Temp/
+/Obj/
+/Logs/
+/UserSettings/
+/.vs/
+*.csproj
+*.sln
+
+# Local Unity QA output and logs (keep Deliverables and release assets)
+/clean-import-smoke/
+/runtime-smoke/
+/unity-*.log
+/unity-*.log.json
+*.bak
