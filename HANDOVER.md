@@ -8,7 +8,7 @@ OpenAIの流体方程式（Navier-Stokes blowup）解説ページの3D流線イ�
 - **参照画像URL**:
   `https://images.ctfassets.net/kftzwdyauwt9/38fsDDtQmNLBW3F74od13W/7f0213895c06edc97709dc82d7905bc3/navier-stokes-dark-master.png?w=1920&q=80&fm=webp`
 - **ポリゴン数制限**:
-  VRChat等での利用を想定し、渦メッシュ本体（`NavierStokes_OpenAI_Vortex`）は **厳密に 20,000 Tris（三角ポリゴン）以下** に収めること（現在の実測は **14,778 Tris**、超過時は生成スクリプトが例外で停止）。
+  VRChat等での利用を想定し、渦メッシュ本体（`NavierStokes_OpenAI_Vortex`）は **厳密に 20,000 Tris（三角ポリゴン）以下** に収めること（現在の実測は **19,770 Tris**、超過時は生成スクリプトが例外で停止）。
 - **シルエット・構造要件**:
   1. **`InnerGold` (axial stretching)**: 中心軸のすぐ近くを螺旋状に昇り降りし、上下端で斜めの毛束（右上・左下）としてスッと伸びるゴールデンオレンジのフィラメント群。
   2. **`MidBlueRibbon`**: オレンジ柱の周囲を斜めに巻き上がる、平たいきしめん状断面のリボン＆チューブ螺旋（ラベンダースレート〜鮮やかなコバルト/アジュールブルー）。
@@ -24,7 +24,7 @@ OpenAIの流体方程式（Navier-Stokes blowup）解説ページの3D流線イ�
 ## 2. ワークスペース内のファイル構成
 - **作業ディレクトリ**: `D:\Programming\vrchat\openai-navier-stokes`
   - `Untitled.blend`: 調整済みシーン。内部の `Text` データブロックは `generate_vortex.py` と同期済み。注釈はBlender内蔵フォントを使用し、外部フォントは埋め込みません。
-  - `generate_vortex.py`: **最新の生成スクリプト**（14,778 Tris。曲線の点数を維持したまま流線数を削減し、旧19,770 Tris版から約25.3%軽量化）。
+  - `generate_vortex.py`: **最新の生成スクリプト**（19,770 Tris、ラベル位置・引き出し線・曲線サンプル数・色味・左ウイングのカールを調整済み）。
   - `render_preview.png`: 保存済み `.blend` を再読込してレンダリングした注釈ON画像（1200×1200）。
   - `render_no_annotations.png`: `SHOW_ANNOTATIONS = False` で生成した注釈OFF画像。
   - `stats.json`: ローカル検証結果（Git管理対象外）。メッシュ統計、Text同期、注釈ON/OFF、外部フォント未同梱、カメラ内への収まりを確認できます。
@@ -69,7 +69,7 @@ Get-Content $stats
   - 例：`n_pts = 23` の場合、1本あたり `6 × 22 = 132 Tris`
 - **カクつき防止のコツ**:
   `OuterCyan` は21点で約0.28〜0.50回転を基本にし、急な折れを抑えます。`InnerGold` と `MidBlueRibbon` は角度を `t` に比例させ、始点付近の角度変化の集中を避けています。3頂点断面・低ポリゴンのため、曲率の高い部分にはまだ角張りが残ります。
-- **現在の配分**: InnerGold = 24本×25点（3,456 Tris）、MidBlueRibbon = 28本×29点（4,704 Tris）、OuterCyan = 42本×21点（5,040 Tris）、ArchStream = 10本×27点（1,560 Tris）、白軸＋矢印 = 18 Tris。合計14,778 Tris。
+- **現在の配分**: InnerGold = 30本×25点（4,320 Tris）、MidBlueRibbon = 36本×29点（6,048 Tris）、OuterCyan = 60本×21点（7,200 Tris）、ArchStream = 14本×27点（2,184 Tris）、白軸＋矢印 = 18 Tris。合計19,770 Tris。
 - **色管理**: `Standard` / `None`、露出0、ガンマ1、解像度100%をスクリプトで指定し、元ファイルのAgX設定による色味の差をなくしています。
 
 ---
@@ -96,7 +96,5 @@ Get-Content $stats
 4. Blender 5.2.3 LTS / Eeveeで注釈OFFとONを実レンダリング。注釈4オブジェクトの分離、19,770 Tris、Textと外部スクリプトの完全一致、保存後の再読込を確認しました。
 5. 本体・注釈の実頂点をカメラへ投影し、全てが画像の各端から3%以上内側に収まることを確認しました。
 6. 公開準備時にArialの埋め込みを除去し、注釈をBlender内蔵フォントに変更。外部アセット未同梱、注釈ON/OFFの再レンダー、保存後のText一致、画面内の余白を再確認しました。`.blend1`・一時スクリプト・検証JSONは公開対象外です。
-7. 軽量化で流線数を合計140本から104本へ削減。各曲線の点数・断面は維持し、密度を抑える代わりに曲線の分割を粗くしない方針です。実測14,778 Tris・7,710頂点（旧19,770 Tris・10,314頂点）。保存済み `.blend` は454,349 bytesから373,540 bytesへ縮小しました。
-8. 軽量版も注釈OFF/ONを実レンダリングし、保存後のText一致、4注釈オブジェクトの分離、外部フォント未同梱、画面端から3%以上の余白を確認しました。VRChat上のFPSやメモリ使用量は未計測です。
 
 参照画像とは流線の密度・細部形状に差があり、画像の完全一致ではありません。FBX出力・Unity/VRChatでのマテリアル表示は未検証です。

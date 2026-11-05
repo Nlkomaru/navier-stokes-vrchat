@@ -140,13 +140,13 @@ np.random.seed(42)
 curve_objects = []
 
 # ==============================================================================
-# 5. OpenAI Navier-Stokes 3層ストリームライン構造（合計 14,778 Tris < 20,000）
+# 5. OpenAI Navier-Stokes 3層ストリームライン構造（合計 19,770 Tris < 20,000）
 # ==============================================================================
 
-# 【パーツA】InnerGold (Axial Stretching): 24本 × 25点 (3,456 Tris)
+# 【パーツA】InnerGold (Axial Stretching): 30本 × 25点 (4,320 Tris)
 # 中心軸の周りを螺旋で昇り降りし、上下端で斜めの毛束（右上・左下）としてスッと伸びる
-for i in range(24):
-    sign_z = 1.0 if i < 12 else -1.0
+for i in range(30):
+    sign_z = 1.0 if i < 15 else -1.0
     theta0 = np.random.uniform(0, 2 * math.pi)
     r_base = np.random.uniform(0.18, 0.58)
     z_start = sign_z * np.random.uniform(-0.40, 0.40)
@@ -180,10 +180,10 @@ for i in range(24):
     obj = build_curve_obj(pts, radii, tilts, f"InnerGold_{i}", prof, mat_inner)
     curve_objects.append((obj, 0))
 
-# 【パーツB】MidBlueRibbon: 28本 × 29点 (4,704 Tris)
+# 【パーツB】MidBlueRibbon: 36本 × 29点 (6,048 Tris)
 # オレンジ柱の周りを斜めに巻き上がる平たい青〜紫スレートのリボンとチューブ。
-for i in range(28):
-    sign_z = 1.0 if i < 14 else -1.0
+for i in range(36):
+    sign_z = 1.0 if i < 18 else -1.0
     theta0 = np.random.uniform(0, 2 * math.pi)
     
     r_start = np.random.uniform(1.08, 1.88)
@@ -222,15 +222,15 @@ for i in range(28):
     obj = build_curve_obj(pts, radii, tilts, f"MidBlue_{i}", prof, mat_mid)
     curve_objects.append((obj, 1))
 
-# 【パーツC】OuterCyan (Inward Spiral): 42本 × 21点 (5,040 Tris)
+# 【パーツC】OuterCyan (Inward Spiral): 60本 × 21点 (7,200 Tris)
 # ★ 左右のウイングがそのまま正面下寄りのボウル弧へシームレスにつながり、中央の青いネストとオレンジ柱を露出させる設計
-for i in range(42):
+for i in range(60):
     n_pts = 21
     t_vals = np.linspace(0, 1, n_pts)
     pts, radii, tilts = [], [], []
     
-    if i < 19:
-        # 【C1: 左ウイング → 正面ボウルへ巻き込むストリーム（19本）】
+    if i < 27:
+        # 【C1: 左ウイング → 正面ボウルへ巻き込むストリーム（27本）】
         theta_tip = math.pi + np.random.uniform(-0.30, 0.25)
         turns = np.random.uniform(0.28, 0.50) * 2 * math.pi
         
@@ -258,8 +258,8 @@ for i in range(42):
             radii.append(max(0.0006, thick * taper))
             tilts.append(0.35 * t)
             
-    elif i < 38:
-        # 【C2: 右上アーチ → 右ウイングへ放射状に広がるストリーム（19本）】
+    elif i < 54:
+        # 【C2: 右上アーチ → 右ウイングへ放射状に広がるストリーム（27本）】
         theta_tip = np.random.uniform(-0.24 * math.pi, 0.16 * math.pi)
         turns = np.random.uniform(0.28, 0.48) * 2 * math.pi
         
@@ -288,7 +288,7 @@ for i in range(42):
             tilts.append(0.35 * t)
             
     else:
-        # 【C3: 左から手前下寄りを通って右へ抜けるボウル・ブリッジ（4本）】
+        # 【C3: 左から手前下寄りを通って右へ抜けるボウル・ブリッジ（6本）】
         theta_start = math.pi + np.random.uniform(-0.15, 0.20)
         turns = np.random.uniform(0.45, 0.60) * 2 * math.pi
         r_mid = np.random.uniform(1.45, 2.05)
@@ -315,9 +315,9 @@ for i in range(42):
     obj = build_curve_obj(pts, radii, tilts, f"OuterCyan_{i}", prof, mat_outer)
     curve_objects.append((obj, 2))
 
-# 【パーツD】下部左側のスムーズな大弧 ＆ 上部右寄りのアーチ（10本 × 27点 = 1,560 Tris）
-for i in range(10):
-    sign_z = -1.0 if i < 6 else 1.0
+# 【パーツD】下部左側のスムーズな大弧 ＆ 上部右寄りのアーチ（14本 × 27点 = 2,184 Tris）
+for i in range(14):
+    sign_z = -1.0 if i < 9 else 1.0
     if sign_z < 0:
         theta0 = np.random.uniform(0.68 * math.pi, 1.15 * math.pi)
         r_mid = np.random.uniform(1.45, 2.25)
